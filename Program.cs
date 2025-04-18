@@ -1,41 +1,27 @@
-var builder = WebApplication.CreateBuilder(args);
+using Microsoft.Extensions.FileProviders;
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
-{
-    app.MapOpenApi();
-}
+var angularDistPath = Path.Combine(Directory.GetCurrentDirectory(), "client", "angular-app1", "dist", "angular-app1", "browser");
+Console.WriteLine($"Serving Angular from: {angularDistPath}");
 
-app.UseHttpsRedirection();
-
-var summaries = new[]
+app.UseDefaultFiles();
+app.UseStaticFiles(new StaticFileOptions
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    FileProvider = new PhysicalFileProvider(angularDistPath),
+    RequestPath = ""
+});
 
-app.MapGet("/weatherforecast", () =>
+app.UseRouting();
+app.MapControllers();
+
+// This is important to serve index.html for Angular routing
+app.MapFallbackToFile("index.html", new StaticFileOptions
 {
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    FileProvider = new PhysicalFileProvider(angularDistPath)
+});
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
