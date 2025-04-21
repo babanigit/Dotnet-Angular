@@ -4,6 +4,8 @@ import { BrowserModule, provideClientHydration } from '@angular/platform-browser
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { PracticeModule } from './practice/practice.module';
+import { PostFreeApiComponent } from './components/post-free-api/post-free-api.component';
+import { HttpClientModule } from '@angular/common/http';
 
 @NgModule({
   declarations: [
@@ -12,7 +14,9 @@ import { PracticeModule } from './practice/practice.module';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    PracticeModule
+    PracticeModule,
+    HttpClientModule, // <-- AND ADD THIS HERE
+
   ],
   providers: [
     provideClientHydration()

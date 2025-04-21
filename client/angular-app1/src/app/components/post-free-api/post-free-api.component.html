@@ -1,0 +1,7 @@
+<div *ngIf="isLoading">Loading posts...</div>
+
+<div *ngIf="errorMessage" class="error">{{ errorMessage }}</div>
+
+<ul *ngIf="!isLoading && posts.length">
+  <li *ngFor="let post of posts">{{ post.title }}</li>
+</ul>
