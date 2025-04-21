@@ -15,25 +15,40 @@ export class PostFreeApiComponent implements OnInit {
   isLoading = false;
   errorMessage = '';
 
+  // query and pagination
+  page = 1;
+  limit = 10;
+  totalPosts = 0;
+  searchQuery = '';
+
   constructor(private postService: GetPostService) {}
 
   ngOnInit(): void {
+    // loading state
     this.postService.getLoadingState().subscribe((state) => {
       this.isLoading = state;
     });
 
+    // error Message
     this.postService
       .getErrorState()
       .subscribe((err) => (this.errorMessage = err));
 
-    this.postService.getPosts().subscribe(
-      //   (data: any) => {
-      //   this.posts = data;
-      // }
+    // fetch post
+    this.fetchPosts();
+  }
 
-      {
-        next: (data: any) => {
-          this.posts = data;
+  fetchPosts() {
+    this.postService
+      .getPosts(this.page, this.limit, this.searchQuery)
+      .subscribe({
+        next: (response) => {
+          this.posts = response.body;
+          console.log('the data is :- ', response);
+
+          const totalCount = response.headers.get('X-Total-Count');
+          console.log("the total count is :- ", totalCount)
+          this.totalPosts = totalCount ? +totalCount : 100; // fallback
         },
         // ,
         // error: (err: any) => {
@@ -41,7 +56,25 @@ export class PostFreeApiComponent implements OnInit {
         //     ' [bab-log-com] Failed to load posts. Please try again:- '),
         //     err;
         // },
-      }
-    );
+      });
+  }
+
+  onSearchChange() {
+    this.page = 1; // reset page on new search
+    this.fetchPosts();
+  }
+
+  nextPage() {
+    if (this.page * this.limit < this.totalPosts) {
+      this.page++;
+      this.fetchPosts();
+    }
+  }
+
+  prevPage() {
+    if (this.page > 1) {
+      this.page--;
+      this.fetchPosts();
+    }
   }
 }
