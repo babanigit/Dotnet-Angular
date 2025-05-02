@@ -1,0 +1,11 @@
+<hr />
+<p>parent-class works!</p>
+
+<label for="framework">
+  <span> username:- </span>
+  <input id="framework" type="text" [(ngModel)]="username" />
+</label>
+
+<hr />
+
+<app-child-class [name]="username" />
