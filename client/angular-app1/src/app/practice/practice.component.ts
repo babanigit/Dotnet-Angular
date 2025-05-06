@@ -1,18 +1,9 @@
-<<<<<<< HEAD
-import { Component } from '@angular/core';
-=======
 import { Component, OnInit } from '@angular/core';
->>>>>>> 541749af3e9466c4efd5510e4775e7684be2876e
 
 @Component({
   selector: 'app-practice',
   templateUrl: './practice.component.html',
-<<<<<<< HEAD
-  styleUrl: './practice.component.css'
-})
-export class PracticeComponent {
 
-=======
   styleUrl: './practice.component.css',
 })
 export class PracticeComponent implements OnInit {
@@ -61,9 +52,5 @@ export class PracticeComponent implements OnInit {
     }, {});
     console.log(count);
     // { apple: 3, banana: 2, orange: 1 }
-
-
-
   }
->>>>>>> 541749af3e9466c4efd5510e4775e7684be2876e
 }
