@@ -1,3 +1,9 @@
+using Dotnet_Angular_Project.Data;
+using Dotnet_Angular_Project.interfaces;
+using Dotnet_Angular_Project.Models;
+using Dotnet_Angular_Project.Services;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,11 +19,19 @@ builder.Services.AddCors();
 builder.Services.AddControllers();
 
 // dbContext
-// builder.Services.AddDbContext(options =>
-//     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// addIdentity
+builder.Services.AddIdentity<AppUser, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+// DI
+builder.Services.AddScoped<ITokenService, TokenService>();
 
 
-// middleware pipeline
+// middleware pipelines
 var app = builder.Build();
 
 var angularDistPath = Path.Combine(Directory.GetCurrentDirectory(), "client", "angular-app1", "dist", "angular-app1", "browser");
