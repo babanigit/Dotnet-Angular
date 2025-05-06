@@ -25,18 +25,28 @@ export class PostFreeApiComponent implements OnInit {
   constructor(private postService: GetPostService) {}
 
   ngOnInit(): void {
-    // loading state
-    this.postService.getLoadingState().subscribe((state) => {
-      this.isLoading = state;
-    });
 
-    // error Message
-    this.postService
-      .getErrorState()
-      .subscribe((err) => (this.errorMessage = err));
+    console.log('[ngOnInit] Called');  // 🔍 debug this
+
+    // // loading state
+    // this.postService.getLoadingState().subscribe((state) => {
+    //   this.isLoading = state;
+    // });
+
+    // // error Message
+    // this.postService
+    //   .getErrorState()
+    //   .subscribe((err) => (this.errorMessage = err));
 
     // fetch post
     this.fetchPosts();
+    this.post2();
+  }
+
+  post2() {
+    this.postService.getPostDotnet().subscribe((data) => {
+      console.log('the post2 data is:- ', data);
+    });
   }
 
   fetchPosts() {
@@ -45,10 +55,10 @@ export class PostFreeApiComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.posts = response.body;
-          console.log('the data is :- ', response);
+          // console.log('the data is :- ', response);
 
           const totalCount = response.headers.get('X-Total-Count');
-          console.log("the total count is :- ", totalCount)
+          console.log('the total count is :- ', totalCount);
           this.totalPosts = totalCount ? +totalCount : 100; // fallback
         },
         // ,

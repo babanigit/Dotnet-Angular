@@ -1,7 +1,8 @@
 // post-service
 import { Injectable } from '@angular/core';
-import { catchError, delay, finalize, Observable, of, Subject } from 'rxjs';
+import { catchError, delay, finalize, Observable, of, Subject, tap } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
+import { Product } from '../models/Product';
 
 @Injectable({
   providedIn: 'root',
@@ -45,4 +46,17 @@ export class GetPostService {
       })
     );
   }
+
+  getPostDotnet() {
+    console.log('[getPostDotnet] called');
+    return this.http.get<Product[]>('/api/products').pipe(
+      delay(500),
+      tap(() => console.log('[getPostDotnet] response received')),
+      catchError((err) => {
+        console.error('[bab-ser] error fetching posts2:- ', err);
+        return of([]);
+      })
+    );
+  }
+
 }
