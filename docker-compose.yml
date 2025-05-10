@@ -1,8 +1,29 @@
-version: '3.8'
+version: "3.8"
 services:
+  postgres:
+    image: postgres:13 # Using the official PostgreSQL image
+    container_name: dot-ang-postgres-bab
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+      - POSTGRES_DB=dot_ang
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data-dot-ang:/var/lib/postgresql/data # Persist data
+
   webapi:
+    container_name: dotnet-webapi-bab
     build: .
     ports:
-      - "5000:5000"
+      - "5333:5333"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Production
+      ASPNETCORE_ENVIRONMENT: Production
+      DefaultConnection: Host=postgres;Database=dot_ang;Username=postgres;Password=admin
+      ASPNETCORE_URLS: http://+:5333
+
+    depends_on:
+      - postgres
+
+volumes:
+  postgres-data-dot-ang:

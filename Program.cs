@@ -11,7 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var jwtSigningKey = Environment.GetEnvironmentVariable("JWT__SigningKey");
+// var jwtSigningKey = Environment.GetEnvironmentVariable("JWT__SigningKey");
 
 // Load .env variables
 DotNetEnv.Env.Load();
@@ -93,7 +93,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = false,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!))
         };
     });
 
@@ -107,6 +107,14 @@ builder.Services.AddScoped<ITokenService, TokenService>();
 
 // middleware pipelines
 var app = builder.Build();
+
+// Migrate database automatically
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    db.Database.Migrate();  // <--- This line does the migration at startup
+}
+
 
 var angularDistPath = Path.Combine(Directory.GetCurrentDirectory(), "client", "angular-app1", "dist", "angular-app1", "browser");
 Console.WriteLine($"Serving Angular from: {angularDistPath}");

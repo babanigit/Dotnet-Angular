@@ -16,33 +16,33 @@ namespace Dotnet_Angular_Project.Services
         private readonly IConfiguration _config;
         private readonly SymmetricSecurityKey _key;
 
-        private readonly string JWTISSUER;
-        private readonly string JWTAUDIENCE;
+        // private readonly string JWTISSUER;
+        // private readonly string JWTAUDIENCE;
 
         public TokenService(IConfiguration config)
         {
             _config = config;
 
             // Load the JWT Signing Key from environment variables
-            var jwtSigningKey = Environment.GetEnvironmentVariable("JWT__SigningKey");
-            if (string.IsNullOrEmpty(jwtSigningKey))
-            {
-                throw new InvalidOperationException("JWT__SigningKey is not set in environment variables.");
-            }
+            // var jwtSigningKey = Environment.GetEnvironmentVariable("JWT__SigningKey");
+            // if (string.IsNullOrEmpty(jwtSigningKey))
+            // {
+            //     throw new InvalidOperationException("JWT__SigningKey is not set in environment variables.");
+            // }
 
-            Console.WriteLine(jwtSigningKey == null ? "❌ Env var missing" : $"✅ Loaded key: {jwtSigningKey.Substring(0, 5)}...");
+            // Console.WriteLine(jwtSigningKey == null ? "❌ Env var missing" : $"✅ Loaded key: {jwtSigningKey.Substring(0, 5)}...");
 
             // Ensure JWT variables are set
-            JWTISSUER = Environment.GetEnvironmentVariable("JWT__Issuer");
-            JWTAUDIENCE = Environment.GetEnvironmentVariable("JWT__Audience");
+            // JWTISSUER = Environment.GetEnvironmentVariable("JWT__Issuer");
+            // JWTAUDIENCE = Environment.GetEnvironmentVariable("JWT__Audience");
 
-            if (string.IsNullOrEmpty(JWTISSUER) || string.IsNullOrEmpty(JWTAUDIENCE))
-            {
-                throw new InvalidOperationException("JWT__Issuer or JWT__Audience is not set in environment variables.");
-            }
+            // if (string.IsNullOrEmpty(JWTISSUER) || string.IsNullOrEmpty(JWTAUDIENCE))
+            // {
+            //     throw new InvalidOperationException("JWT__Issuer or JWT__Audience is not set in environment variables.");
+            // }
 
-            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey));
-            Console.WriteLine($"✅ Loaded JWT Issuer: {JWTISSUER} and Audience: {JWTAUDIENCE}");
+            _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:SigningKey"]));
+            // Console.WriteLine($"✅ Loaded JWT Issuer: {JWTISSUER} and Audience: {JWTAUDIENCE}");
         }
 
         public string CreateToken(AppUser user)
@@ -60,8 +60,8 @@ namespace Dotnet_Angular_Project.Services
                 Subject = new ClaimsIdentity(claims),
                 Expires = DateTime.Now.AddDays(7),
                 SigningCredentials = creds,
-                Issuer = JWTISSUER,
-                Audience = JWTAUDIENCE
+                Issuer = _config["JWT:Issuer"],
+                Audience = _config["JWT:Audience"]
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
