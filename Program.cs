@@ -11,7 +11,16 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load .env variables
+DotNetEnv.Env.Load();
+builder.Configuration.AddEnvironmentVariables();
+
 // var jwtSigningKey = Environment.GetEnvironmentVariable("JWT__SigningKey");
+
+// Read config values
+// var IS_LOCALHOST = Environment.GetEnvironmentVariable("IS_LOCALHOST");
+var connStr = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
+Console.WriteLine($"✅ Connection String: {connStr}");
 
 // Load .env variables
 DotNetEnv.Env.Load();
@@ -42,7 +51,7 @@ builder.Services.AddRazorPages();
 
 // dbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseNpgsql(connStr));
 
 // addIdentity
 builder.Services.AddIdentity<AppUser, IdentityRole>()
