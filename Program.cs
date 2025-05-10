@@ -51,8 +51,8 @@ builder.Services.AddRazorPages();
 
 // dbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(connStr));
-
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    
 // addIdentity
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
