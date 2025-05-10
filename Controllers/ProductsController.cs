@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Dotnet_Angular_Project.Controllers
@@ -11,7 +12,8 @@ namespace Dotnet_Angular_Project.Controllers
     public class ProductsController : ControllerBase
     {
         [HttpGet]
-        public IActionResult Get()
+        [Authorize]
+        public async Task<IActionResult> Get()
         {
             var products = new[] {
                 new { Id = 1, Name = "Pen" },

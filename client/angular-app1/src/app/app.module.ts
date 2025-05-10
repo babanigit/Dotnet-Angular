@@ -10,6 +10,7 @@ import { PracticeModule } from './practice/practice.module';
 
 import { PostFreeApiComponent } from './components/post-free-api/post-free-api.component';
 import { HttpClientModule } from '@angular/common/http';
+import { HomeComponent } from './components/home/home.component';
 
 @NgModule({
   declarations: [AppComponent],

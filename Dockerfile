@@ -1,5 +1,5 @@
 # Use the official .NET SDK image to build and publish the app
-FROM mcr.microsoft.com/dotnet/sdk:7.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 WORKDIR /app
 
 # Copy everything and publish the app
@@ -7,7 +7,7 @@ COPY . ./
 RUN dotnet publish -c Release -o out
 
 # Runtime stage
-FROM mcr.microsoft.com/dotnet/aspnet:7.0 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 
 # Copy published output
@@ -21,4 +21,4 @@ COPY ./client/angular-app1/dist/angular-app1/browser ./client/angular-app1/dist/
 EXPOSE 5000
 ENV ASPNETCORE_URLS=http://+:5000
 
-ENTRYPOINT ["dotnet", "YourProjectName.dll"]
+ENTRYPOINT ["dotnet", "MyFullStackApp.dll"]

@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { ParentClassComponent } from '../components/parent-class/parent-class.component';
 import { ChildClassComponent } from '../components/child-class/child-class.component';
 import { PostFreeApiComponent } from '../components/post-free-api/post-free-api.component';
+import { HomeComponent } from '../components/home/home.component';
 
 @NgModule({
   declarations: [
@@ -15,7 +16,8 @@ import { PostFreeApiComponent } from '../components/post-free-api/post-free-api.
     CommonModule,
     FormsModule,
     ParentClassComponent,
-    PostFreeApiComponent
+    PostFreeApiComponent,
+    HomeComponent
 
   ],
   exports:[

@@ -30,7 +30,6 @@ namespace Dotnet_Angular_Project.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto registerDto)
         {
-
             try
             {
 
@@ -50,11 +49,15 @@ namespace Dotnet_Angular_Project.Controllers
 
                     var token = _tokenService.CreateToken(appUser);
 
+                    Console.WriteLine($"✅ the token reg is :- {token}");
+
+
+
                     // Set cookie
                     Response.Cookies.Append("jwt", token, new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = true, // use false only in dev over HTTP
+                        // Secure = true, // use false only in dev over HTTP
                         SameSite = SameSiteMode.Strict,
                         Expires = DateTimeOffset.UtcNow.AddDays(7)
                     });
@@ -88,12 +91,16 @@ namespace Dotnet_Angular_Project.Controllers
 
             var token = _tokenService.CreateToken(user);
 
+            Console.WriteLine($"✅ the token login is :- {token}");
+
+
             // Set cookie
             Response.Cookies.Append("jwt", token, new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true, // use false only in dev over HTTP
-                SameSite = SameSiteMode.Strict,
+                SameSite = SameSiteMode.Lax, // or None if using cross-site
+                Secure = false,          // set to true in productio
+                // SameSite = SameSiteMode.Strict,
                 Expires = DateTimeOffset.UtcNow.AddDays(7)
             });
 

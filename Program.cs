@@ -1,22 +1,44 @@
+using System.Text;
 using Dotnet_Angular_Project.Data;
 using Dotnet_Angular_Project.interfaces;
 using Dotnet_Angular_Project.Models;
 using Dotnet_Angular_Project.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var jwtSigningKey = Environment.GetEnvironmentVariable("JWT__SigningKey");
 
 // Load .env variables
 DotNetEnv.Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 
-// cors
-builder.Services.AddCors();
+
 
 // controller
 builder.Services.AddControllers();
+
+// cors
+builder.Services.AddCors(
+//     options =>
+// {
+//     options.AddPolicy("AllowFrontendApp", builder =>
+//     {
+//         builder
+//             .WithOrigins("http://localhost:5030") // your Angular app's URL
+//             .AllowAnyHeader()
+//             .AllowAnyMethod()
+//             .AllowCredentials(); // <- This is crucial
+//     });
+// }
+);
+
+builder.Services.AddRazorPages();
+
 
 // dbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -26,6 +48,58 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
+
+
+
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Login"; // or your actual login path
+    options.AccessDeniedPath = "/Account/AccessDenied";
+
+    options.Events.OnRedirectToLogin = context =>
+    {
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
+
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = 403;
+        return Task.CompletedTask;
+    };
+});
+
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var token = context.Request.Cookies["jwt"]; // This is where your "jwt" cookie is being read
+                if (!string.IsNullOrEmpty(token))
+                {
+                    context.Token = token; // Setting the token for JWT Bearer Authentication
+                }
+                return Task.CompletedTask;
+            }
+        };
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSigningKey))
+        };
+    });
+
+
+builder.Services.AddAuthorization();
+
 
 // DI
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -46,7 +120,7 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseHttpsRedirection();
 
-app.UseCors();
+app.UseCors("AllowFrontendApp");
 
 app.UseRouting();
 
