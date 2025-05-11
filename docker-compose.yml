@@ -17,6 +17,8 @@ services:
     build: .
     ports:
       - "5333:5333"
+    env_file:
+      - ./.env # Load environment variables
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       DefaultConnection: Host=postgres;Database=dot_ang;Username=postgres;Password=admin

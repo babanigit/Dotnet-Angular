@@ -14,51 +14,29 @@ var builder = WebApplication.CreateBuilder(args);
 // Load .env variables
 DotNetEnv.Env.Load();
 builder.Configuration.AddEnvironmentVariables();
+var config = builder.Configuration;
 
-// var jwtSigningKey = Environment.GetEnvironmentVariable("JWT__SigningKey");
+var connStr = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+              ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
-// Read config values
-// var IS_LOCALHOST = Environment.GetEnvironmentVariable("IS_LOCALHOST");
-var connStr = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection");
-Console.WriteLine($"✅ Connection String: {connStr}");
-
-// Load .env variables
-DotNetEnv.Env.Load();
-builder.Configuration.AddEnvironmentVariables();
-
-
+Console.WriteLine($"✅ Connection String is: {connStr}");
 
 // controller
 builder.Services.AddControllers();
 
 // cors
-builder.Services.AddCors(
-//     options =>
-// {
-//     options.AddPolicy("AllowFrontendApp", builder =>
-//     {
-//         builder
-//             .WithOrigins("http://localhost:5030") // your Angular app's URL
-//             .AllowAnyHeader()
-//             .AllowAnyMethod()
-//             .AllowCredentials(); // <- This is crucial
-//     });
-// }
-);
+builder.Services.AddCors();
 
 builder.Services.AddRazorPages();
 
-
 // dbContext
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-    
+    options.UseNpgsql(connStr));
+
 // addIdentity
 builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
-
-
 
 
 builder.Services.ConfigureApplicationCookie(options =>
@@ -137,7 +115,7 @@ app.UseStaticFiles(new StaticFileOptions
 
 app.UseHttpsRedirection();
 
-app.UseCors("AllowFrontendApp");
+app.UseCors();
 
 app.UseRouting();
 
@@ -147,8 +125,7 @@ app.UseAuthorization();
 app.MapControllers();
 // app.MapControllers().RequireHost("*").RequirePathStartsWithSegments("/api");
 
-// Basic route for /
-// app.MapGet("/", () => "api is live");
+
 app.MapGet("/api/status", () => "API is live");
 
 
