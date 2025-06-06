@@ -85,26 +85,13 @@ namespace Dotnet_Angular_Project.Controllers
 
             if (user == null) return Unauthorized("Invalid username!");
 
-            var result = await _signinManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+            var result = await _signinManager.PasswordSignInAsync(user, loginDto.Password, isPersistent: true, lockoutOnFailure: false);
 
-            if (!result.Succeeded) return Unauthorized("Username or password is incorrect");
-
-            var token = _tokenService.CreateToken(user);
-
-            Console.WriteLine($"✅ the token login is :- {token}");
-
-
-            // Set cookie
-            Response.Cookies.Append("jwt", token, new CookieOptions
-            {
-                HttpOnly = true,
-                SameSite = SameSiteMode.Lax, // or None if using cross-site
-                Secure = false,          // set to true in productio
-                // SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddDays(7)
-            });
+            if (!result.Succeeded)
+                return Unauthorized("Username or password is incorrect");
 
             return Ok(new { message = "Login successful" });
+
         }
 
 

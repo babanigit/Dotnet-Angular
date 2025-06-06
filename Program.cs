@@ -3,6 +3,7 @@ using Dotnet_Angular_Project.Data;
 using Dotnet_Angular_Project.interfaces;
 using Dotnet_Angular_Project.Models;
 using Dotnet_Angular_Project.Services;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -25,7 +26,18 @@ Console.WriteLine($"✅ Connection String is: {connStr}");
 builder.Services.AddControllers();
 
 // cors
-builder.Services.AddCors();
+// builder.Services.AddCors();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAngularClient", builder =>
+    {
+        builder.WithOrigins("http://localhost:4200")
+               .AllowAnyHeader()
+               .AllowAnyMethod()
+               .AllowCredentials(); // <--- this is critical
+    });
+});
+
 
 builder.Services.AddRazorPages();
 
@@ -39,54 +51,35 @@ builder.Services.AddIdentity<AppUser, IdentityRole>()
     .AddDefaultTokenProviders();
 
 
+// Cookie Authentication
 builder.Services.ConfigureApplicationCookie(options =>
 {
-    options.LoginPath = "/Account/Login"; // or your actual login path
-    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.LoginPath = "/api/account/login";
+    options.AccessDeniedPath = "/api/account/accessdenied";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 
+    // 🔥 This is the critical part
     options.Events.OnRedirectToLogin = context =>
     {
-        context.Response.StatusCode = 401;
+        if (context.Request.Path.StartsWithSegments("/api"))
+        {
+            context.Response.StatusCode = 401;
+            context.Response.ContentType = "application/json";
+            return context.Response.WriteAsync("{\"error\": \"Unauthorized\"}");
+        }
+        context.Response.Redirect(context.RedirectUri); // fallback for non-API
         return Task.CompletedTask;
     };
 
-    options.Events.OnRedirectToAccessDenied = context =>
-    {
-        context.Response.StatusCode = 403;
-        return Task.CompletedTask;
-    };
 });
 
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                var token = context.Request.Cookies["jwt"]; // This is where your "jwt" cookie is being read
-                if (!string.IsNullOrEmpty(token))
-                {
-                    context.Token = token; // Setting the token for JWT Bearer Authentication
-                }
-                return Task.CompletedTask;
-            }
-        };
-
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = false,
-            ValidateAudience = false,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:SigningKey"]!))
-        };
-    });
-
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie();
 
 builder.Services.AddAuthorization();
-
 
 // DI
 builder.Services.AddScoped<ITokenService, TokenService>();
@@ -99,7 +92,7 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.Migrate();  // <--- This line does the migration at startup
+    // db.Database.Migrate();  // <--- This line does the migration at startup
 }
 
 

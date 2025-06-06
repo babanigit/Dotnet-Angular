@@ -54,6 +54,7 @@ export class GetPostService {
       tap(() => console.log('[getPostDotnet] response received')),
       catchError((err) => {
         console.error('[bab-ser] error fetching posts2:- ', err);
+        console.log("the error is:- ", err)
         return of([]);
       })
     );
